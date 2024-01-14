@@ -1,0 +1,43 @@
+name: CI/CD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Descargar codigo del repositorio
+        uses: actions/checkout@v4
+      - name: Login to DockerHUB
+        uses: docker/login-action@v3
+        with: 
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Construir imagen and push Docker image
+        uses: docker/build-push-action@v5
+        with: 
+          context: ./app
+          push: true
+          tags: oscarbasaguren/as-laboratorio-8-web:latest
+      - name: Login Google Cloud
+        uses: “google-github-actions/auth@v1
+        with: 
+          credentials_json: ${{ secrets.GCLOUD_TOKEN }}
+          project_id: ${{ secrets.GCLOUD_PROYECT}}
+      - name: Autenticate to Kubernetes Engine
+        uses: simenandre/setup-gke-gcloud-auth-plugin@v1
+      - name: Configure kubetctl 
+        uses: google-github-actions/get-gke-credentials@v1
+        with:
+          cluster_name: lab8-cluster
+          location: us-central1
+      - name: Despliegue de kubernetes en el cluster
+        run: |
+          kubectl apply -f ./k8s/deployment-front-web.yml
+          kubectl apply -f ./k8s/deployment-bd.yml
+          kubectl apply -f ./k8s/redis.yml
+          kubectl apply -f ./k8s/load-balancer.yml
+          kubectl rollout restart deployment front-web-deployment
+          kubectl rollout restart deployment db-deployment
+      
