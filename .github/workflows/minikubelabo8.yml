@@ -35,3 +35,5 @@ jobs:
             kubectl rollout restart deployment front-web-deployment
             kubectl rollout restart deployment db-deployment
         
+
+
