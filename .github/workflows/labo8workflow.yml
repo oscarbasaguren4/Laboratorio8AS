@@ -21,7 +21,7 @@ jobs:
           push: true
           tags: oscarbasaguren/as-laboratorio-8-web:latest
       - name: Login Google Cloud
-        uses: “google-github-actions/auth@v1
+        uses: google-github-actions/auth@v1
         with: 
           credentials_json: ${{ secrets.GCLOUD_TOKEN }}
           project_id: ${{ secrets.GCLOUD_PROYECT}}
